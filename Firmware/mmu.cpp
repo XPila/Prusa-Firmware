@@ -32,7 +32,7 @@ void extr_mov(float shift, float feed_rate)
 void change_extr(int extr) { //switches multiplexer for extruders
 #ifdef SNMM
 	st_synchronize();
-	delay(100);
+	_delay(100);
 
 	disable_e0();
 	disable_e1();
@@ -65,7 +65,7 @@ void change_extr(int extr) { //switches multiplexer for extruders
 		
 		break;
 	}
-	delay(100);
+	_delay(100);
 #endif
 }
 
@@ -245,7 +245,7 @@ void extr_unload()
 		lcd_puts_P(_T(MSG_ERROR));
 		lcd_set_cursor(0, 2);
 		lcd_puts_P(_T(MSG_PREHEAT_NOZZLE));
-		delay(2000);
+		_delay(2000);
 		lcd_clear();
 	}
 	//lcd_return_to_status();
@@ -362,7 +362,7 @@ void extr_unload_all()
 		lcd_puts_P(_T(MSG_ERROR));
 		lcd_set_cursor(0, 2);
 		lcd_puts_P(_T(MSG_PREHEAT_NOZZLE));
-		delay(2000);
+		_delay(2000);
 		lcd_clear();
 		lcd_return_to_status();
 	}
@@ -386,7 +386,7 @@ void extr_unload_used()
 		lcd_puts_P(_T(MSG_ERROR));
 		lcd_set_cursor(0, 2);
 		lcd_puts_P(_T(MSG_PREHEAT_NOZZLE));
-		delay(2000);
+		_delay(2000);
 		lcd_clear();
 		lcd_return_to_status();
 	}
