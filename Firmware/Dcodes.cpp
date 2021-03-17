@@ -7,6 +7,7 @@
 
 #define SHOW_TEMP_ADC_VALUES
 #include "temperature.h"
+#include "w25x20cl.h"
 
 
 #define DBG(args...) printf_P(args)
@@ -351,9 +352,153 @@ void dcode_5()
 
 #ifdef DEBUG_DCODES
 
+void xflash_test_write_random_256bytes(unsigned int seed, uint32_t addr)
+{
+	uint32_t index;
+	uint8_t* buff = (uint8_t*)block_buffer;
+	srand(seed);
+	for (index = 0; index < 256; index ++)
+		buff[index] = rand();
+    w25x20cl_wait_busy();
+    w25x20cl_enable_wr();
+    w25x20cl_page_program(addr, buff, 256);
+    w25x20cl_wait_busy();
+    w25x20cl_disable_wr();
+}
+
+uint16_t xflash_test_check_random_256bytes(unsigned int seed, uint32_t addr)
+{
+	uint32_t index;
+	uint8_t value;
+	uint8_t* buff = (uint8_t*)block_buffer;
+	uint16_t errors = 0;
+	srand(seed);
+	w25x20cl_rd_data(addr, buff, 256);
+	for (index = 0; index < 256; index ++)
+	{
+		value = rand();
+		if (buff[index] != value)
+		{
+			printf_P(_N("  error at 0x%05x %02x %02x\n"), addr + index, value, buff[index]);
+			errors++;
+		}
+	}
+	return errors;
+}
+
+static void watchdogConfig(uint8_t x) {
+  WDTCSR = _BV(WDCE) | _BV(WDE);
+  WDTCSR = x;
+}
+
+void xflash_test(uint32_t loops)
+{
+	uint32_t loop = 0;
+	uint32_t totalerrors = 0;
+	uint32_t pageerrors = 0;
+	uint16_t page;
+	uint32_t addr;
+	uint16_t check;
+	unsigned int seed;
+	uint32_t t_start;
+	uint32_t t_end;
+	watchdogConfig(0); //wdt disabled
+	while (loops)
+	{
+		t_start = millis();
+		printf_P(_N("loop_%lu start\n"), loop);
+        w25x20cl_wait_busy();
+        w25x20cl_enable_wr();
+		w25x20cl_chip_erase();
+        w25x20cl_wait_busy();
+		printf_P(_N(" chip erase complete\n"));
+        for (page = 0; page < 4*256; page++)
+        {
+        	seed = page + 4 * 256 * loop;
+        	addr = ((uint32_t)page) << 8;
+        	xflash_test_write_random_256bytes(seed, addr);
+        	check = xflash_test_check_random_256bytes(seed, addr);
+			totalerrors += check;
+			if (((page + 1) % 256) == 0)
+			{
+				if (pageerrors == totalerrors)
+					printf_P(_N(" page %u-%u OK\n"), page - 255, page);
+				else
+					printf_P(_N(" page %u-%u %u errors\n"), page - 255, page, totalerrors - pageerrors);
+				pageerrors = totalerrors;
+			}
+        }
+        if (loops > 0)
+        	loops--;
+		t_end = millis();
+        printf_P(_N("loop_%lu end (%lu ms), total errors: %lu\n"), loop, t_end - t_start, totalerrors);
+        loop++;
+	}
+	watchdogConfig((_BV(WDP3) | _BV(WDE))); //wdt 4s
+}
+
 void dcode_6()
 {
 	LOG("D6 - Read/Write external FLASH\n");
+	uint32_t address = 0x0000; //default 0x0000
+	uint16_t count = 0x0400; //default 0x0400 (1kb block)
+	if (code_seen('t')) // Test loops (1-2^32)
+	{
+		uint32_t loops = (uint32_t)code_value();
+		if (loops > 0)
+			xflash_test(loops);
+		return;
+	}
+	if (code_seen('A')) // Address (0x00000-0x3ffff)
+		address = (strchr_pointer[1] == 'x')?strtol(strchr_pointer + 2, 0, 16):(int)code_value();
+	if (code_seen('C')) // Count (0x0001-0x2000)
+		count = (int)code_value();
+	address &= 0x3ffff;
+	if (count > 0x2000) count = 0x2000;
+	if ((address + count) > 0x40000) count = 0x40000 - address;
+	bool bErase = false;
+	bool bCopy = false;
+	if (code_seen('E')) //Erase
+		bErase = true;
+	uint8_t data[16];
+	if (code_seen('X')) // Data
+	{
+		count = parse_hex(strchr_pointer + 1, data, 16);
+		if (count > 0) bCopy = true;
+	}
+	if (bErase)
+	{
+        w25x20cl_wait_busy();
+        w25x20cl_enable_wr();
+		w25x20cl_chip_erase();
+        w25x20cl_wait_busy();
+        w25x20cl_disable_wr();
+	}
+	if (bCopy)
+	{
+	    w25x20cl_wait_busy();
+	    w25x20cl_enable_wr();
+	    w25x20cl_page_program(address, data, count);
+	    w25x20cl_wait_busy();
+	    w25x20cl_disable_wr();
+	}
+	while (count)
+	{
+		print_hex_nibble(address >> 16);
+		print_hex_word(address);
+		putchar(' ');
+		uint8_t countperline = 16;
+		w25x20cl_rd_data(address, data, countperline);
+		while (count && countperline)
+		{
+			putchar(' ');
+			print_hex_byte(data[16 - countperline]);
+			countperline--;
+			count--;
+		}
+		address += 16;
+		putchar('\n');
+	}
 }
 
 void dcode_7()
