@@ -9,6 +9,9 @@
 #define _MFRID             0xEF
 #define _DEVID             0x11
 
+#define _MFRID2            0xC8 // GD25Q20C
+#define _DEVID2            0x11
+
 #define _CMD_ENABLE_WR     0x06
 #define _CMD_ENABLE_WR_VSR 0x50
 #define _CMD_DISABLE_WR    0x04
@@ -165,6 +168,7 @@ void w25x20cl_rd_uid(uint8_t* uid)
 	_CS_HIGH();
 }
 
+
 int w25x20cl_mfrid_devid(void)
 {
 	_CS_LOW();
@@ -175,7 +179,11 @@ int w25x20cl_mfrid_devid(void)
 	uint8_t w25x20cl_mfrid = _SPI_RX();  // receive mfrid
 	uint8_t w25x20cl_devid = _SPI_RX();  // receive devid
 	_CS_HIGH();
-	return ((w25x20cl_mfrid == _MFRID) && (w25x20cl_devid == _DEVID));
+	if ((w25x20cl_mfrid == _MFRID) && (w25x20cl_devid == _DEVID))
+		return 1;
+	if ((w25x20cl_mfrid == _MFRID2) && (w25x20cl_devid == _DEVID2))
+		return 1;
+	return 0;
 }
 
 void w25x20cl_wait_busy(void)
