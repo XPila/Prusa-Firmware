@@ -6372,6 +6372,18 @@ static void lcd_test_menu()
 	w25x20cl_chip_erase();
 	w25x20cl_disable_wr();
 }
+
+extern void xflash_test(int32_t loops);
+
+static void lcd_test2_menu()
+{
+	lcd_clear();
+	lcd_set_cursor(0, 1);
+	lcd_puts_P(_N("XFlash test"));
+	lcd_set_cursor(0, 2);
+	lcd_puts_P(_N("press reset to end"));
+	xflash_test(-1);
+}
 #endif //LCD_TEST
 
 //! @brief Resume paused print
@@ -6584,7 +6596,8 @@ static void lcd_main_menu()
   }
   MENU_ITEM_SUBMENU_P(_i("Support"), lcd_support_menu);////MSG_SUPPORT
 #ifdef LCD_TEST
-    MENU_ITEM_SUBMENU_P(_i("W25x20CL init"), lcd_test_menu);////MSG_SUPPORT
+	  MENU_ITEM_SUBMENU_P(_i("W25x20CL init"), lcd_test_menu);////MSG_SUPPORT
+	  MENU_ITEM_SUBMENU_P(_i("XFlash test"), lcd_test2_menu);////MSG_SUPPORT
 #endif //LCD_TEST
 
   MENU_END();
