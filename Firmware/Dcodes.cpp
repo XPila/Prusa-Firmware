@@ -373,6 +373,7 @@ uint16_t xflash_test_check_random_256bytes(unsigned int seed, uint32_t addr)
 	uint8_t* buff = (uint8_t*)block_buffer;
 	uint16_t errors = 0;
 	srand(seed);
+	memset(buff, 0, 256); //for sure
 	w25x20cl_rd_data(addr, buff, 256);
 	for (index = 0; index < 256; index ++)
 	{
@@ -391,7 +392,7 @@ static void watchdogConfig(uint8_t x) {
   WDTCSR = x;
 }
 
-void xflash_test(uint32_t loops)
+void xflash_test(int32_t loops)
 {
 	uint32_t loop = 0;
 	uint32_t totalerrors = 0;
@@ -414,12 +415,12 @@ void xflash_test(uint32_t loops)
 		for (i = 0; i < 8; i++)
 			print_hex_byte(uid[i]);
 		printf_P(_N("\n"));
-		printf_P(_N(" chip erase complete\n"));
+		printf_P(_N(" chip erase start, time=%lu\n"), millis());
         w25x20cl_wait_busy();
         w25x20cl_enable_wr();
 		w25x20cl_chip_erase();
         w25x20cl_wait_busy();
-		printf_P(_N(" chip erase complete\n"));
+		printf_P(_N(" chip erase complete, time=%lu\n"), millis());
         for (page = 0; page < 4*256; page++)
         {
         	seed = page + 4 * 256 * loop;
