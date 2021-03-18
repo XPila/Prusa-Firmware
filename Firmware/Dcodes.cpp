@@ -402,11 +402,19 @@ void xflash_test(uint32_t loops)
 	unsigned int seed;
 	uint32_t t_start;
 	uint32_t t_end;
+	uint8_t uid[8];
+	int i;
 	watchdogConfig(0); //wdt disabled
 	while (loops)
 	{
 		t_start = millis();
-		printf_P(_N("loop_%lu start\n"), loop);
+		printf_P(_N("loop_%lu start, time=%lu\n"), loop, t_start);
+		w25x20cl_rd_uid(uid);
+		printf_P(_N(" UID = "));
+		for (i = 0; i < 8; i++)
+			print_hex_byte(uid[i]);
+		printf_P(_N("\n"));
+		printf_P(_N(" chip erase complete\n"));
         w25x20cl_wait_busy();
         w25x20cl_enable_wr();
 		w25x20cl_chip_erase();
