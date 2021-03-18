@@ -149,6 +149,9 @@
 #define MINTEMP_MINAMBIENT_RAW  978
 
 #define DEBUG_DCODE3
+#define DEBUG_DCODES //D codes
+#define LCD_TEST
+#define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
 
 //#define DEBUG_BUILD
 //#define DEBUG_SEC_LANG   //secondary language debug output at startup
