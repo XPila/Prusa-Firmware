@@ -378,6 +378,8 @@ uint16_t xflash_test_check_random_256bytes(unsigned int seed, uint32_t addr)
 	for (index = 0; index < 256; index ++)
 	{
 		value = rand();
+//		if (value == 0xaa) // simulate error
+//			value = 0x55;
 		if (buff[index] != value)
 		{
 			printf_P(_N("  error at 0x%05x %02x %02x\n"), addr + index, value, buff[index]);
