@@ -2106,6 +2106,9 @@ static alert_automaton_mintemp alert_automaton_hotend, alert_automaton_bed;
 
 void check_min_temp_heater0()
 {
+#ifdef DEBUG_DISABLE_MINTEMP
+	return;
+#endif
 //heater
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
 	if (current_temperature_raw[0] >= minttemp_raw[0]) {
@@ -2128,6 +2131,9 @@ void check_min_temp_heater0()
 
 void check_min_temp_bed()
 {
+#ifdef DEBUG_DISABLE_MINTEMP
+	return;
+#endif
 #if HEATER_BED_RAW_LO_TEMP > HEATER_BED_RAW_HI_TEMP
 	if (current_temperature_bed_raw >= bed_minttemp_raw) {
 #else
