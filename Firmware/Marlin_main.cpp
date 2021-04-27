@@ -1273,15 +1273,15 @@ void setup()
 
 #ifdef TMC2130_LINEARITY_CORRECTION
 #ifdef TMC2130_LINEARITY_CORRECTION_XYZ
-	tmc2130_wave_fac[X_AXIS] = eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_X_FAC);
-	tmc2130_wave_fac[Y_AXIS] = eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_Y_FAC);
-	tmc2130_wave_fac[Z_AXIS] = eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_Z_FAC);
+	tmc2130_wave_fac[X_AXIS] = ((int16_t)eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_X_FAC)) - 128;
+	tmc2130_wave_fac[Y_AXIS] = ((int16_t)eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_Y_FAC)) - 128;
+	tmc2130_wave_fac[Z_AXIS] = ((int16_t)eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_Z_FAC)) - 128;
 #endif //TMC2130_LINEARITY_CORRECTION_XYZ
-	tmc2130_wave_fac[E_AXIS] = eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_E_FAC);
-	if (tmc2130_wave_fac[X_AXIS] == 0xff) tmc2130_wave_fac[X_AXIS] = 0;
-	if (tmc2130_wave_fac[Y_AXIS] == 0xff) tmc2130_wave_fac[Y_AXIS] = 0;
-	if (tmc2130_wave_fac[Z_AXIS] == 0xff) tmc2130_wave_fac[Z_AXIS] = 0;
-	if (tmc2130_wave_fac[E_AXIS] == 0xff) tmc2130_wave_fac[E_AXIS] = 0;
+	tmc2130_wave_fac[E_AXIS] = ((int16_t)eeprom_read_byte((uint8_t*)EEPROM_TMC2130_WAVE_E_FAC)) - 128;
+	if (tmc2130_wave_fac[X_AXIS] == 127) tmc2130_wave_fac[X_AXIS] = 0;
+	if (tmc2130_wave_fac[Y_AXIS] == 127) tmc2130_wave_fac[Y_AXIS] = 0;
+	if (tmc2130_wave_fac[Z_AXIS] == 127) tmc2130_wave_fac[Z_AXIS] = 0;
+	if (tmc2130_wave_fac[E_AXIS] == 127) tmc2130_wave_fac[E_AXIS] = 0;
 #endif //TMC2130_LINEARITY_CORRECTION
 
 #ifdef TMC2130_VARIABLE_RESOLUTION
