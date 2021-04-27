@@ -260,8 +260,8 @@
 #define TMC2130_SG_THRS_E       3     // stallguard sensitivity for E axis
 
 //new settings is possible for vsense = 1, running current value > 31 set vsense to zero and shift both currents by 1 bit right (Z axis only)
-#define TMC2130_CURRENTS_H {40, 40, 52, 32}  // default holding currents for all axes
-#define TMC2130_CURRENTS_R {40, 40, 52, 32}  // default running currents for all axes
+#define TMC2130_CURRENTS_H {35, 35, 52, 29}  // default holding currents for all axes
+#define TMC2130_CURRENTS_R {35, 35, 52, 29}  // default running currents for all axes
 #define TMC2130_UNLOAD_CURRENT_R 12			 // lowe current for M600 to protect filament sensor 
 
 #define TMC2130_STEALTH_Z
