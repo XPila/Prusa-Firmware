@@ -3484,7 +3484,11 @@ void process_commands()
 			if (axis < 4)
 			{
 				uint8_t fac = (uint8_t)strtol(CMDBUFFER_CURRENT_STRING + 14, NULL, 10);
-				tmc2130_set_wave(axis, 247, fac);
+#ifdef TMC2130_LINEARITY_CORRECTION_V2
+				tmc2130_set_wave_v2(axis, 248, ((float)fac/1000), 0);
+#else //TMC2130_LINEARITY_CORRECTION_V2
+				tmc2130_set_wave_v1(axis, 248, fac);
+#endif //TMC2130_LINEARITY_CORRECTION_V2
 			}
 		}
 		else if (strncmp_P(CMDBUFFER_CURRENT_STRING + 4, PSTR("SET_STEP_"), 9) == 0) //! TMC_SET_STEP_

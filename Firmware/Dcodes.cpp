@@ -623,7 +623,11 @@ void dcode_2130()
 				uint8_t fac1000 = atoi(strchr_pointer + 11) & 0xffff;
 				if (fac1000 < TMC2130_WAVE_FAC1000_MIN) fac1000 = 0;
 				if (fac1000 > TMC2130_WAVE_FAC1000_MAX) fac1000 = TMC2130_WAVE_FAC1000_MAX;
-				tmc2130_set_wave(axis, 247, fac1000);
+#ifdef TMC2130_LINEARITY_CORRECTION_V2
+				tmc2130_set_wave_v2(axis, 248, ((float)fac1000/1000), 0);
+#else //TMC2130_LINEARITY_CORRECTION_V2
+				tmc2130_set_wave_v1(axis, 247, fac1000);
+#endif //TMC2130_LINEARITY_CORRECTION_V2
 				tmc2130_wave_fac[axis] = fac1000;
 			}
 		}

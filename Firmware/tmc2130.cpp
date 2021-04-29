@@ -209,11 +209,21 @@ void tmc2130_init()
 
 #ifdef TMC2130_LINEARITY_CORRECTION
 #ifdef TMC2130_LINEARITY_CORRECTION_XYZ
-	tmc2130_set_wave(X_AXIS, 247, tmc2130_wave_fac[X_AXIS]);
-	tmc2130_set_wave(Y_AXIS, 247, tmc2130_wave_fac[Y_AXIS]);
-	tmc2130_set_wave(Z_AXIS, 247, tmc2130_wave_fac[Z_AXIS]);
+#ifdef TMC2130_LINEARITY_CORRECTION_V2
+	tmc2130_set_wave_v2(X_AXIS, 248, ((float)tmc2130_wave_fac[X_AXIS])/1000, 0);
+	tmc2130_set_wave_v2(Y_AXIS, 248, ((float)tmc2130_wave_fac[Y_AXIS])/1000, 0);
+	tmc2130_set_wave_v2(Z_AXIS, 248, ((float)tmc2130_wave_fac[Z_AXIS])/1000, 0);
+#else //TMC2130_LINEARITY_CORRECTION_V2
+	tmc2130_set_wave_v1(X_AXIS, 248, tmc2130_wave_fac[X_AXIS]);
+	tmc2130_set_wave_v1(Y_AXIS, 248, tmc2130_wave_fac[Y_AXIS]);
+	tmc2130_set_wave_v1(Z_AXIS, 248, tmc2130_wave_fac[Z_AXIS]);
+#endif //TMC2130_LINEARITY_CORRECTION_V2
 #endif //TMC2130_LINEARITY_CORRECTION_XYZ
-	tmc2130_set_wave(E_AXIS, 247, tmc2130_wave_fac[E_AXIS]);
+#ifdef TMC2130_LINEARITY_CORRECTION_V2
+	tmc2130_set_wave_v2(E_AXIS, 248, ((float)tmc2130_wave_fac[E_AXIS])/1000, 0);
+#else //TMC2130_LINEARITY_CORRECTION_V2
+	tmc2130_set_wave_v1(E_AXIS, 248, tmc2130_wave_fac[E_AXIS]);
+#endif //TMC2130_LINEARITY_CORRECTION_V2
 #endif //TMC2130_LINEARITY_CORRECTION
 
 }
@@ -847,17 +857,60 @@ void tmc2130_get_wave(uint8_t axis, uint8_t* data, FILE* stream)
 	tmc2130_set_pwr(axis, pwr);
 }
 
-void tmc2130_set_wave(uint8_t axis, uint8_t amp, int16_t fac1000)
+
+typedef uint8_t (tmc2130_wave_func_t)(uint8_t pha1024, uint8_t amp, void* ppar);
+
+void tmc2130_set_wave(uint8_t axis, uint8_t amp, tmc2130_wave_func_t* func, void* ppar);
+
+
+uint8_t tmc2130_wave_func_default(uint8_t pha1024, uint8_t amp, void* ppar)
+{
+	return (uint8_t)((amp+1) * sin((2 * M_PI * pha1024 + M_PI) / 1024) + 0.5) - 1;
+}
+
+uint8_t tmc2130_wave_func_v1(uint8_t pha1024, uint8_t amp, void* ppar)
+{
+	float fac = 1;
+	if (ppar) fac = *((float*)ppar);
+	return (uint8_t)(amp * pow(sin(2 * M_PI * pha1024 / 1024), fac) + 0.5);
+}
+
+uint8_t tmc2130_wave_func_v2(uint8_t pha1024, uint8_t amp, void* ppar)
+{
+	float fac0 = ((float*)ppar)[0];
+	float fac1 = ((float*)ppar)[1];
+	float pha = pha1024 * M_PI / 512;
+	float sin4x = fac1 * sin(4 * pha);
+	float sin4x2 = fac0 * sin(4 * pha + sin4x);
+	float val = sin(pha + sin4x2);
+	return (uint8_t)(amp * val + 0.5);
+}
+
+void tmc2130_set_wave_v1(uint8_t axis, uint8_t amp, int16_t fac1000)
+{
+	//	printf_P(PSTR("tmc2130_set_wave_v1 %hhd %hhd\n"), axis, fac1000);
+	if (fac1000 < TMC2130_WAVE_FAC1000_MIN) fac1000 = TMC2130_WAVE_FAC1000_MIN;
+	if (fac1000 > TMC2130_WAVE_FAC1000_MAX) fac1000 = TMC2130_WAVE_FAC1000_MAX;
+	float fac = 1;
+	if (fac1000) fac = (((float)fac1000 + 1000) / 1000); //correction factor
+//	printf_P(PSTR(" factor: %s\n"), ftostr43(fac));
+	if (fac == 0) // default TMC wave
+		tmc2130_set_wave(axis, amp, tmc2130_wave_func_default, 0);
+	else // corrected wave
+		tmc2130_set_wave(axis, amp, tmc2130_wave_func_v1, &fac);
+}
+
+void tmc2130_set_wave_v2(uint8_t axis, uint8_t amp, float fac0, float fac1)
+{
+	float par[2] = {fac0, fac1};
+	tmc2130_set_wave(axis, amp, tmc2130_wave_func_v2, &par);
+}
+
+
+void tmc2130_set_wave(uint8_t axis, uint8_t amp, tmc2130_wave_func_t* func, void* ppar)
 {
 // TMC2130 wave compression algorithm
 // optimized for minimal memory requirements
-//	printf_P(PSTR("tmc2130_set_wave %hhd %hhd\n"), axis, fac1000);
-	if (fac1000 < TMC2130_WAVE_FAC1000_MIN) fac1000 = TMC2130_WAVE_FAC1000_MIN;
-	if (fac1000 > TMC2130_WAVE_FAC1000_MAX) fac1000 = TMC2130_WAVE_FAC1000_MAX;
-	float fac = 1.0;
-	if (fac1000)
-		fac = ((float)fac1000 + 1000) / 1000; //correction factor
-//	printf_P(PSTR(" factor: %s\n"), ftostr43(fac));
 	uint8_t vA = 0;                //value of currentA
 	uint8_t va = 0;                //previous vA
 	int8_t d0 = 0;                //delta0
@@ -875,10 +928,7 @@ void tmc2130_set_wave(uint8_t axis, uint8_t amp, int16_t fac1000)
 		if ((i & 0x1f) == 0)
 			reg = 0;
 		// calculate value
-		if (fac == 0) // default TMC wave
-			vA = (uint8_t)((amp+1) * sin((2*PI*i + PI)/1024) + 0.5) - 1;
-		else // corrected wave
-			vA = (uint8_t)(amp * pow(sin(2*PI*i/1024), fac) + 0.5);
+		vA = func(i, amp, ppar);
 		dA = vA - va; // calculate delta
 		va = vA;
 		b = -1;
