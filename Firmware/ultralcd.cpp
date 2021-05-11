@@ -3101,8 +3101,10 @@ static void _lcd_move(const char *name, int axis, int min, int max)
 
 static void lcd_move_e()
 {
+#ifndef DEBUG_DISABLE_PREVENT_EXTRUDER
 	if (degHotend0() > EXTRUDE_MINTEMP)
 	{
+#endif // DEBUG_DISABLE_PREVENT_EXTRUDER
 		if (lcd_encoder != 0)
 		{
 			refresh_cmd_timeout();
@@ -3122,12 +3124,14 @@ static void lcd_move_e()
 			menu_draw_float31(PSTR("Extruder:"), current_position[E_AXIS]);
 		}
 		if (LCD_CLICKED) menu_back();
+#ifndef DEBUG_DISABLE_PREVENT_EXTRUDER
 	}
 	else
 	{
 		show_preheat_nozzle_warning();
 		lcd_return_to_status();
 	}
+#endif // DEBUG_DISABLE_PREVENT_EXTRUDER
 }
 
 
