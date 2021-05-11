@@ -512,9 +512,8 @@ extern int8_t CrashDetectMenu;
 void crashdet_enable()
 {
 	tmc2130_sg_stop_on_crash = true;
-	eeprom_update_byte((uint8_t*)EEPROM_CRASH_DET, 0xFF); 
+	eeprom_update_byte((uint8_t*)EEPROM_CRASH_DET, 0x01);
 	CrashDetectMenu = 1;
-
 }
 
 void crashdet_disable()
@@ -723,8 +722,10 @@ if((eSoundMode==e_SOUND_MODE_LOUD)||(eSoundMode==e_SOUND_MODE_ONCE))
 			eeprom_update_byte((uint8_t *)EEPROM_MMU_LOAD_FAIL, 0);
 
 #ifdef FILAMENT_SENSOR
-			fsensor_enable();
-            fsensor_autoload_set(true);
+//			fsensor_enable();
+//			fsensor_autoload_set(true);
+			fsensor_disable();
+            fsensor_autoload_set(false);
 #endif //FILAMENT_SENSOR
                        
 if((eSoundMode==e_SOUND_MODE_LOUD)||(eSoundMode==e_SOUND_MODE_ONCE))
@@ -1260,7 +1261,12 @@ void setup()
 	if (silentMode == 0xff) silentMode = 0;
 	tmc2130_mode = TMC2130_MODE_NORMAL;
 	uint8_t crashdet = eeprom_read_byte((uint8_t*)EEPROM_CRASH_DET);
-	if (crashdet && !farm_mode)
+	if (crashdet == 0xff)
+	{
+		crashdet_disable();
+	    puts_P(_N("CrashDetect DISABLED"));
+	}
+/*	if (crashdet && !farm_mode)
 	{
 		crashdet_enable();
 	    puts_P(_N("CrashDetect ENABLED!"));
@@ -1269,7 +1275,7 @@ void setup()
 	{
 		crashdet_disable();
 	    puts_P(_N("CrashDetect DISABLED"));
-	}
+	}*/
 
 #ifdef TMC2130_LINEARITY_CORRECTION
 #ifdef TMC2130_LINEARITY_CORRECTION_XYZ
