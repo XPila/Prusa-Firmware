@@ -15,7 +15,7 @@
 #define DEVELOPER
 
 // Printer name
-#define CUSTOM_MENDEL_NAME "Prusa i3 MK3S"
+#define CUSTOM_MENDEL_NAME "Prusa MKX34T4"
 
 // Electronics
 #define MOTHERBOARD BOARD_EINSY_1_0a
@@ -153,8 +153,9 @@
 #define DEBUG_DISABLE_STARTMSGS //no startup messages
 #define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
 #define DEBUG_ESTEP_DUP_PIN 21  //duplicate e-step output to pin 21 (SCL on P3)
-#define DEBUG_EDIR_DUP_PIN  21
-//#define DEBUG_EENA_DUP_PIN  21
+#define DEBUG_EDIR_DUP_PIN  20  //duplicate e-dir output to pin 20 (SDA on P3)
+//#define DEBUG_EENA_DUP_PIN
+#define DEBUG_DISABLE_PREVENT_EXTRUDER //cold extrusion and long extrusion allowed
 
 //#define DEBUG_BUILD
 //#define DEBUG_SEC_LANG   //secondary language debug output at startup
@@ -258,8 +259,8 @@
 #define TMC2130_TCOOLTHRS_E 500       // TCOOLTHRS - coolstep treshold
 
 #define TMC2130_SG_HOMING       1     // stallguard homing
-#define TMC2130_SG_THRS_X       3     // stallguard sensitivity for X axis
-#define TMC2130_SG_THRS_Y       3     // stallguard sensitivity for Y axis
+#define TMC2130_SG_THRS_X       5     // stallguard sensitivity for X axis
+#define TMC2130_SG_THRS_Y       5     // stallguard sensitivity for Y axis
 #define TMC2130_SG_THRS_Z       4     // stallguard sensitivity for Z axis
 #define TMC2130_SG_THRS_E       3     // stallguard sensitivity for E axis
 
