@@ -11,6 +11,8 @@ ifneq (,$(filter-out $(ALL_CONFIGURATIONS), $(BUILD_CONFIGURATION)))
 $(error invalid configuration "$(BUILD_CONFIGURATION)")
 endif
 
+PRN_VARIANT ?= 0
+
 # target platform prefix, default is avr
 TOOLCHAIN_PREFIX ?= avr
 
@@ -81,6 +83,7 @@ SYMBOLS := \
 	ARDUINO=$(ARDUINO)\
 	ARDUINO_AVR_RAMBO\
 	ARDUINO_ARCH_AVR\
+	PRN_VARIANT=$(PRN_VARIANT)
 
 # include directories
 INCLUDES := 
@@ -185,8 +188,19 @@ flash:
 	@$(AVRDUDE) -V -v -v -p atmega2560 -c wiring -P COM12 -b115200 -D -U flash:w:$(subst /,$(PATH_SEPARATOR),$(OUTHEX)):i
 #	@$(AVRDUDE) -C./bin/avrdude.conf -V -v -v -p atmega2560 -c wiring -P $port -b115200 -D -U flash:w:./output/Firmware.ino.hex:i 
 
+build_MK34_MK3:
+	@make -s build PRN_VARIANT=1
+
+build_MK34_trapez_MK3:
+	@make -s build PRN_VARIANT=2
+
+build_MK34_trapez_X:
+	@make -s build PRN_VARIANT=4
+
 .PHONY: all build clean
 
 
 test:
-	@echo $(ARDUINO_GCCOBJ)
+#	@echo $(ARDUINO_GCCOBJ)
+	@make -s build PRN_VARIANT=1
+	
