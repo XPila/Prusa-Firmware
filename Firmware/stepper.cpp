@@ -368,9 +368,15 @@ ISR(TIMER1_COMPA_vect) {
 	uint8_t cnt = 0;
     for (uint8_t i = estep_loops; e_steps && i --;) {
         WRITE_NC(E0_STEP_PIN, !INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,!INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
         -- e_steps;
 		cnt++;
         WRITE_NC(E0_STEP_PIN, INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
     }
 #ifdef FILAMENT_SENSOR
 		if (READ(E0_DIR_PIN) == INVERT_E0_DIR)
@@ -555,6 +561,9 @@ FORCE_INLINE void stepper_next_block()
         (mmu_extruder == 0 || mmu_extruder == 2) ? !INVERT_E0_DIR :
   #endif // SNMM
         INVERT_E0_DIR);
+#ifdef DEBUG_EDIR_DUP_PIN
+    WRITE(DEBUG_EDIR_DUP_PIN,INVERT_E0_DIR);
+#endif //DEBUG_EDIR_DUP_PIN
 #endif /* LIN_ADVANCE */
       count_direction[E_AXIS] = -1;
     } else { // +direction
@@ -564,6 +573,9 @@ FORCE_INLINE void stepper_next_block()
         (mmu_extruder == 0 || mmu_extruder == 2) ? INVERT_E0_DIR :
   #endif // SNMM
         !INVERT_E0_DIR);
+#ifdef DEBUG_EDIR_DUP_PIN
+    WRITE(DEBUG_EDIR_DUP_PIN,!INVERT_E0_DIR);
+#endif //DEBUG_EDIR_DUP_PIN
 #endif /* LIN_ADVANCE */
       count_direction[E_AXIS] = 1;
     }
@@ -775,6 +787,9 @@ FORCE_INLINE void stepper_tick_lowres()
     if (counter_e.lo > 0) {
 #ifndef LIN_ADVANCE
       WRITE(E0_STEP_PIN, !INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE(DEBUG_ESTEP_DUP_PIN,!INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
 #endif /* LIN_ADVANCE */
       counter_e.lo -= current_block->step_event_count.lo;
       count_position[E_AXIS] += count_direction[E_AXIS];
@@ -785,6 +800,9 @@ FORCE_INLINE void stepper_tick_lowres()
 	  ++ fsensor_counter;
 	#endif //FILAMENT_SENSOR
       WRITE(E0_STEP_PIN, INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
 #endif
     }
     if(++ step_events_completed.lo >= current_block->step_event_count.lo)
@@ -837,6 +855,9 @@ FORCE_INLINE void stepper_tick_highres()
     if (counter_e.wide > 0) {
 #ifndef LIN_ADVANCE
       WRITE(E0_STEP_PIN, !INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE(DEBUG_ESTEP_DUP_PIN,!INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
 #endif /* LIN_ADVANCE */
       counter_e.wide -= current_block->step_event_count.wide;
       count_position[E_AXIS]+=count_direction[E_AXIS];
@@ -847,6 +868,9 @@ FORCE_INLINE void stepper_tick_highres()
       ++ fsensor_counter;
   #endif //FILAMENT_SENSOR
       WRITE(E0_STEP_PIN, INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
 #endif
     }
     if(++ step_events_completed.wide >= current_block->step_event_count.wide)
@@ -908,6 +932,9 @@ FORCE_INLINE void isr() {
         #endif
             ? INVERT_E0_DIR : !INVERT_E0_DIR; //If we have SNMM, reverse every second extruder.
           WRITE_NC(E0_DIR_PIN, dir);
+#ifdef DEBUG_EDIR_DUP_PIN
+    WRITE_NC(DEBUG_EDIR_DUP_PIN, dir);
+#endif //DEBUG_EDIR_DUP_PIN
           if (neg)
             // Flip the e_steps counter to be always positive.
             e_steps = - e_steps;
@@ -934,8 +961,14 @@ FORCE_INLINE void isr() {
 #endif //FILAMENT_SENSOR
         do {
           WRITE_NC(E0_STEP_PIN, !INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,!INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
           -- e_steps;
           WRITE_NC(E0_STEP_PIN, INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
         } while (-- estep_loops != 0);
         //WRITE_NC(LOGIC_ANALYZER_CH7, false);
         MSerial.checkRx(); // Check for serial chars.
@@ -1074,8 +1107,14 @@ FORCE_INLINE void isr() {
 #endif //FILAMENT_SENSOR
         do {
           WRITE_NC(E0_STEP_PIN, !INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,!INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
           -- e_steps;
           WRITE_NC(E0_STEP_PIN, INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    WRITE_NC(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
         } while (e_steps);
         OCR1A = nextMainISR;
       } else {
@@ -1155,6 +1194,9 @@ void st_init()
   #endif
   #if defined(E0_DIR_PIN) && E0_DIR_PIN > -1
     SET_OUTPUT(E0_DIR_PIN);
+#ifdef DEBUG_EDIR_DUP_PIN
+    SET_OUTPUT(DEBUG_EDIR_DUP_PIN);
+#endif //DEBUG_EDIR_DUP_PIN
   #endif
   #if defined(E1_DIR_PIN) && (E1_DIR_PIN > -1)
     SET_OUTPUT(E1_DIR_PIN);
@@ -1311,6 +1353,10 @@ void st_init()
   #if defined(E0_STEP_PIN) && (E0_STEP_PIN > -1)
     SET_OUTPUT(E0_STEP_PIN);
     WRITE(E0_STEP_PIN,INVERT_E_STEP_PIN);
+#ifdef DEBUG_ESTEP_DUP_PIN
+    SET_OUTPUT(DEBUG_ESTEP_DUP_PIN);
+    WRITE(DEBUG_ESTEP_DUP_PIN,INVERT_E_STEP_PIN);
+#endif //DEBUG_ESTEP_DUP_PIN
     disable_e0();
   #endif
   #if defined(E1_STEP_PIN) && (E1_STEP_PIN > -1)
