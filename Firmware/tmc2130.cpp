@@ -61,7 +61,7 @@ tmc2130_chopper_config_t tmc2130_chopper_config[4] = {
 	{TMC2130_TOFF_E, 5, 1, 2, 0}
 };
 
-bool tmc2130_sg_stop_on_crash = true;
+bool tmc2130_sg_stop_on_crash = false;
 uint8_t tmc2130_sg_diag_mask = 0x00;
 uint8_t tmc2130_sg_crash = 0;
 uint16_t tmc2130_sg_err[4] = {0, 0, 0, 0};
