@@ -154,7 +154,7 @@
 #define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
 #define DEBUG_ESTEP_DUP_PIN 21  //duplicate e-step output to pin 21 (SCL on P3)
 #define DEBUG_EDIR_DUP_PIN  20  //duplicate e-dir output to pin 20 (SDA on P3)
-//#define DEBUG_EENA_DUP_PIN
+#define DEBUG_EENA_DUP_PIN  62  //duplicate e-ena output to pin 62 (SDA on P3)
 #define DEBUG_DISABLE_PREVENT_EXTRUDER //cold extrusion and long extrusion allowed
 
 //#define DEBUG_BUILD

@@ -7836,6 +7836,9 @@ if(0)
      previous_millis_cmd=_millis();
      st_synchronize();
      WRITE(E0_ENABLE_PIN,oldstatus);
+#ifdef DEBUG_EENA_DUP_PIN
+    WRITE(DEBUG_EENA_DUP_PIN,oldstatus);
+#endif //DEBUG_EENA_DUP_PIN
     }
   #endif
   #ifdef TEMP_STAT_LEDS

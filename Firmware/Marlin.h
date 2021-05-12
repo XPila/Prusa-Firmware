@@ -190,8 +190,14 @@ void manage_inactivity(bool ignore_stepper_queue=false);
 
 
 #if defined(E0_ENABLE_PIN) && (E0_ENABLE_PIN > -1)
-  #define enable_e0() WRITE(E0_ENABLE_PIN, E_ENABLE_ON)
-  #define disable_e0() WRITE(E0_ENABLE_PIN,!E_ENABLE_ON)
+#ifndef DEBUG_EENA_DUP_PIN
+#define enable_e0() WRITE(E0_ENABLE_PIN, E_ENABLE_ON)
+#define disable_e0() WRITE(E0_ENABLE_PIN,!E_ENABLE_ON)
+#else //DEBUG_EENA_DUP_PIN
+#define enable_e0() { WRITE(E0_ENABLE_PIN, E_ENABLE_ON); WRITE(DEBUG_EENA_DUP_PIN,E_ENABLE_ON); }
+#define disable_e0() { WRITE(E0_ENABLE_PIN,!E_ENABLE_ON); WRITE(DEBUG_EENA_DUP_PIN,!E_ENABLE_ON); }
+#endif //DEBUG_EENA_DUP_PIN
+
 #else
   #define enable_e0()  /* nothing */
   #define disable_e0() /* nothing */
